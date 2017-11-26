@@ -11,9 +11,11 @@ public class PlayerController : MonoBehaviour
     public float fallMultiplier = 2.5f; //this value affects how fast you fall for jump juice
     private Rigidbody2D myRigidbody;
 
+
     public bool grounded;
     public LayerMask whatIsGround;
     public bool dashing;
+    public bool landing;
 
     private Collider2D myCollider;
 
@@ -41,6 +43,9 @@ public class PlayerController : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
     {
+
+        HandleLayers();
+
         //jumping + grounded condition
         grounded = Physics2D.IsTouchingLayers(myCollider, whatIsGround);
 
@@ -51,8 +56,23 @@ public class PlayerController : MonoBehaviour
             if (grounded)
             {
                 myRigidbody.velocity = new Vector2(myRigidbody.velocity.x, jumpForce);
+                myAnimator.SetTrigger("Jump");
             }
         }
+
+        if (myRigidbody.velocity.y <0)
+        {
+            landing = true;
+        } else
+        {
+            landing = false;
+        }
+        if (landing == true)
+        {
+            myAnimator.SetBool("Land", true);
+        }
+
+       
 
         //jump juice
         if (rb.velocity.y < 0)
@@ -65,9 +85,9 @@ public class PlayerController : MonoBehaviour
         {
             if (!dashing)
             {
-                moveSpeed = moveSpeed * 5;
+                moveSpeed = moveSpeed * 3;
                 GetComponent<Rigidbody2D>().constraints = RigidbodyConstraints2D.FreezePositionY | RigidbodyConstraints2D.FreezeRotation;
-                dashTimer = 0.2f;
+                dashTimer = 0.4f;
             }
         }
 
@@ -102,5 +122,34 @@ public class PlayerController : MonoBehaviour
             myAnimator.SetFloat ("Speed", myRigidbody.velocity.x);
         myAnimator.SetBool("Grounded", grounded);
 	}
+
+    private void HandleLayers()
+    {
+        if (grounded == false)
+        {
+            myAnimator.SetLayerWeight(1, 1);
+        }
+        else
+        {
+            myAnimator.SetLayerWeight(1, 0);
+        }
+
+        if (grounded == true)
+        {
+            myAnimator.ResetTrigger("Jump");
+            myAnimator.SetBool("Land", false);
+        }
+
+        if (dashing == true)
+        {
+            myAnimator.SetBool("Dashing", true);
+        }
+        else
+        {
+            myAnimator.SetBool("Dashing", false);
+        }
+       
+    }
+
 
 }
